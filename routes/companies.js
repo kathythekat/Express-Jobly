@@ -47,7 +47,8 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  const companies = await Company.findAll();
+  let filter = req.query;
+  const companies = await Company.findAll(filter);
   return res.json({ companies });
 });
 
@@ -98,3 +99,4 @@ router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
 
 
 module.exports = router;
+

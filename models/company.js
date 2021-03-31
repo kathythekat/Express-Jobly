@@ -49,15 +49,47 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
+  static async findAll(filters = {}) {
+    if (Object.keys(filters).length === 0) {
+      const companiesRes = await db.query(
+            `SELECT handle,
+                    name,
+                    description,
+                    num_employees AS "numEmployees",
+                    logo_url AS "logoUrl"
+            FROM companies
+            ORDER BY name`);
+    return companiesRes.rows;
+    }
+    const {name, minEmployees, maxEmployees} = filters;
+    let companyQuery =  
+      `SELECT handle,
+            name,
+            description,
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
+            FROM companies`;
+
+    let conditions = [];
+    if (minEmployees > maxEmployees) {
+      throw new BadRequestError('Minimum employees must be less than max employees.');
+    }
+    if (name) {
+      let nameFilter = `name iLIKE '%${name}%'`
+      conditions.push(nameFilter);
+    }
+    if (minEmployees) {
+      let minFilter = `num_employees >= ${minEmployees}`;
+      conditions.push(minFilter);
+    }
+    if (maxEmployees) {
+      let maxFilter = `num_employees <= ${maxEmployees}`;
+      conditions.push(maxFilter);
+    }
+    if (conditions.length > 0) {
+      companyQuery+= ' WHERE ' + conditions.join(' AND ');
+    }
+    const companiesRes = await db.query(companyQuery);
     return companiesRes.rows;
   }
 
