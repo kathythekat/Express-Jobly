@@ -163,15 +163,15 @@ describe("update", function () {
     email: "new@email.com",
     isAdmin: true,
   };
-  
+
   test("sql partial update works", async function() {
     let {setCols, values} = sqlForPartialUpdate(updateData,
       {firstName: "first_name",
       lastName: "last_name",
-      email: "new2@email.com",
-      isAdmin: true,
+      email: "email",
+      isAdmin: "is_admin",
       });
-    expect(setCols).toEqual('"first_name"=$1, "last_name"=$2, "new2@email.com"=$3, "true"=$4')
+    expect(setCols).toEqual('"first_name"=$1, "last_name"=$2, "email"=$3, "is_admin"=$4')
     expect(values).toEqual(['NewF', 'NewF', 'new@email.com', true])
   })
   
@@ -187,7 +187,7 @@ describe("update", function () {
     } catch(err) {
       expect(err instanceof BadRequestError).toBeTruthy();
     }
-  })
+  });
 
   test("works", async function () {
     let job = await User.update("u1", updateData);

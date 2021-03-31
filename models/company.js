@@ -46,7 +46,12 @@ class Company {
 
   /** Find all companies.
    *
+   * if filter is passed into query string, then dynamically apply filters to query
+   * if filter terms provided, push to conditions array and expressions array, utilizing
+   * conditions length for sanitation of query terms
+   * 
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * 
    * */
 
   static async findAll(filters = {}) {
@@ -71,25 +76,29 @@ class Company {
             FROM companies`;
 
     let conditions = [];
+    let expressions = [];
     if (minEmployees > maxEmployees) {
       throw new BadRequestError('Minimum employees must be less than max employees.');
     }
     if (name) {
-      let nameFilter = `name iLIKE '%${name}%'`
-      conditions.push(nameFilter);
+      conditions.push(`%${name}%`)
+      expressions.push(`name ILIKE $${conditions.length}`) 
     }
     if (minEmployees) {
-      let minFilter = `num_employees >= ${minEmployees}`;
-      conditions.push(minFilter);
+      conditions.push(minEmployees);
+      expressions.push(`num_employees >= $${conditions.length}`);
     }
     if (maxEmployees) {
-      let maxFilter = `num_employees <= ${maxEmployees}`;
-      conditions.push(maxFilter);
+      conditions.push(maxEmployees);
+      expressions.push(`num_employees <= $${conditions.length}`);
     }
-    if (conditions.length > 0) {
-      companyQuery+= ' WHERE ' + conditions.join(' AND ');
+    if (expressions.length > 0) {
+      companyQuery += ' WHERE ' + expressions.join(' AND ') + ' ORDER BY name';
+    } else {
+      throw new BadRequestError();
     }
-    const companiesRes = await db.query(companyQuery);
+
+    const companiesRes = await db.query(companyQuery, conditions);
     return companiesRes.rows;
   }
 
