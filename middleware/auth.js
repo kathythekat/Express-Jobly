@@ -34,16 +34,57 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
+  // console.log("GLOBAL: ", res.locals.user.username);
+  // console.log("PARAMS: ", req.params.username);
+  
   try {
-    if (!res.locals.user) throw new UnauthorizedError();
+    if (!res.locals.user || res.locals.user.username !== req.params.username) {
+      throw new UnauthorizedError("here");
+    }
     return next();
   } catch (err) {
     return next(err);
   }
 }
 
+/** Middleware to verify user is admin
+ *
+ * If not, raises Unauthorized.
+ */
+
+function ensureAdminUser(req, res, next) {
+  try {
+    if (!res.locals.user ||
+        !res.locals.user.isAdmin) {
+      throw new UnauthorizedError("This action is only allowed for admins");
+    } else {
+      return next();
+    }
+  } catch (err) {
+    return next(err);
+  }
+  return next()
+}
+
+function ensureLoggedInOrAdmin(req, res, next){
+  try {
+    const user = res.locals.user
+
+    if(!(user && (res.locals.user.username === req.params.username || res.locals.user.isAdmin))) {
+      throw new UnauthorizedError("Must be valid user for this action");
+    } else {
+      return next();
+    }
+  } catch (err) {
+    return next(err);
+  }
+  return next()
+}
+
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
+  ensureAdminUser,
+  ensureLoggedInOrAdmin
 };

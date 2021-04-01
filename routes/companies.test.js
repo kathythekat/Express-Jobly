@@ -11,6 +11,7 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  u2Token
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -29,7 +30,7 @@ describe("POST /companies", function () {
     numEmployees: 10,
   };
 
-  test("ok for users", async function () {
+  test("ok for admin to add company", async function () {
     const resp = await request(app)
         .post("/companies")
         .send(newCompany)
@@ -38,6 +39,16 @@ describe("POST /companies", function () {
     expect(resp.body).toEqual({
       company: newCompany,
     });
+  });
+
+  test("not ok for non-admin user to add company", async function () {
+    const resp = await request(app)
+        .post("/companies")
+        .send(newCompany)
+        .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body.error.message)
+      .toEqual("This action is only allowed for admins");
   });
 
   test("bad request with missing data", async function () {
@@ -146,7 +157,7 @@ describe("GET /companies/:handle", function () {
 /************************************** PATCH /companies/:handle */
 
 describe("PATCH /companies/:handle", function () {
-  test("works for users", async function () {
+  test("works for admins", async function () {
     const resp = await request(app)
         .patch(`/companies/c1`)
         .send({
@@ -163,6 +174,19 @@ describe("PATCH /companies/:handle", function () {
       },
     });
   });
+
+  test("doesn't work for non-admin user", async function () {
+    const resp = await request(app)
+        .patch(`/companies/c1`)
+        .send({
+          name: "C1-new",
+        })
+        .set("authorization", `Bearer ${u2Token}`);
+        expect(resp.statusCode).toEqual(401);
+        expect(resp.body.error.message)
+          .toEqual("This action is only allowed for admins");
+  });
+
 
   test("unauth for anon", async function () {
     const resp = await request(app)
@@ -207,11 +231,18 @@ describe("PATCH /companies/:handle", function () {
 /************************************** DELETE /companies/:handle */
 
 describe("DELETE /companies/:handle", function () {
-  test("works for users", async function () {
+  test("works for admin users", async function () {
     const resp = await request(app)
         .delete(`/companies/c1`)
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({ deleted: "c1" });
+  });
+
+  test("doesn't work for non-admin users", async function () {
+    const resp = await request(app)
+        .delete(`/companies/c1`);
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body.error.message).toEqual("This action is only allowed for admins");
   });
 
   test("unauth for anon", async function () {
