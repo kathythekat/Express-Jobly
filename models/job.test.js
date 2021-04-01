@@ -172,90 +172,84 @@ describe("get", function () {
     });
   });
 
+  test("not found if no such job", async function () {
+    try {
+      await Job.get(4);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+// /************************************** update */
+
+describe("update", function () {
+  const updateData = {
+    title: "j4",
+    salary: 400,
+    equity: "0.04",
+  };
+
+  test("works", async function () {
+    let job = await Job.update(jobIds[0], updateData);
+    expect(job).toEqual({
+      id: jobIds[0],
+      title: "j4",
+      salary: 400,
+      equity: "0.04",
+      companyHandle: "c1"
+    });
+  });
+
+  test("works: null fields", async function () {
+    const updateDataSetNulls = {
+      title: "j1",
+      salary:null,
+      equity: null,
+      companyHandle: "c1",
+    }
+    let job = await Job.update(jobIds[0], updateDataSetNulls);
+    expect(job).toEqual({
+      id: jobIds[0],
+      title: "j1",
+      salary:null,
+      equity: null,
+      companyHandle: "c1",
+    });
+  });
+});
+
+  //   const result = await db.query(
+  //         `SELECT handle, name, description, num_employees, logo_url
+  //          FROM jobs
+  //          WHERE handle = 'c1'`);
+  //   expect(result.rows).toEqual([{
+  //     handle: "c1",
+  //     name: "New",
+  //     description: "New Description",
+  //     num_employees: null,
+  //     logo_url: null,
+  //   }]);
+  // });
+
   // test("not found if no such job", async function () {
   //   try {
-  //     await Job.get("nope");
+  //     await Job.update("nope", updateData);
   //     fail();
   //   } catch (err) {
   //     expect(err instanceof NotFoundError).toBeTruthy();
   //   }
   // });
-});
 
-// /************************************** update */
-
-// describe("update", function () {
-//   const updateData = {
-//     name: "New",
-//     description: "New Description",
-//     numEmployees: 10,
-//     logoUrl: "http://new.img",
-//   };
-
-//   test("works", async function () {
-//     let job = await Job.update("c1", updateData);
-//     expect(job).toEqual({
-//       handle: "c1",
-//       ...updateData,
-//     });
-
-//     const result = await db.query(
-//           `SELECT handle, name, description, num_employees, logo_url
-//            FROM jobs
-//            WHERE handle = 'c1'`);
-//     expect(result.rows).toEqual([{
-//       handle: "c1",
-//       name: "New",
-//       description: "New Description",
-//       num_employees: 10,
-//       logo_url: "http://new.img",
-//     }]);
-//   });
-
-//   test("works: null fields", async function () {
-//     const updateDataSetNulls = {
-//       name: "New",
-//       description: "New Description",
-//       numEmployees: null,
-//       logoUrl: null,
-//     };
-
-//     let job = await Job.update("c1", updateDataSetNulls);
-//     expect(job).toEqual({
-//       handle: "c1",
-//       ...updateDataSetNulls,
-//     });
-
-//     const result = await db.query(
-//           `SELECT handle, name, description, num_employees, logo_url
-//            FROM jobs
-//            WHERE handle = 'c1'`);
-//     expect(result.rows).toEqual([{
-//       handle: "c1",
-//       name: "New",
-//       description: "New Description",
-//       num_employees: null,
-//       logo_url: null,
-//     }]);
-//   });
-
-//   test("not found if no such job", async function () {
-//     try {
-//       await Job.update("nope", updateData);
-//       fail();
-//     } catch (err) {
-//       expect(err instanceof NotFoundError).toBeTruthy();
-//     }
-//   });
-
-//   test("bad request with no data", async function () {
-//     try {
-//       await Job.update("c1", {});
-//       fail();
-//     } catch (err) {
-//       expect(err instanceof BadRequestError).toBeTruthy();
-//     }
-//   });
+  // test("bad request with no data", async function () {
+  //   try {
+  //     await Job.update("c1", {});
+  //     fail();
+  //   } catch (err) {
+  //     expect(err instanceof BadRequestError).toBeTruthy();
+  //   }
+  // });
 // });
 
 // /************************************** remove */
