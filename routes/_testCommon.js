@@ -17,7 +17,7 @@ async function commonBeforeAll() {
     {
       title: "j1",
       salary: 100,
-      equity: 1,
+      equity: 0.01,
       companyHandle: "c1"
     }
   )
@@ -25,7 +25,7 @@ async function commonBeforeAll() {
     {
       title: "j2",
       salary: 200,
-      equity: 2,
+      equity: 0.02,
       companyHandle: "c2"
     }
   )
@@ -33,7 +33,7 @@ async function commonBeforeAll() {
     {
       title: "j3",
       salary: 300,
-      equity: 3,
+      equity: 0.03,
       companyHandle: "c3"
     }
   )
