@@ -25,12 +25,22 @@ class Job {
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate job: ${title}`);
+    
+    const handleCheck = await db.query(
+      `SELECT company_handle
+        FROM jobs
+        WHERE company_handle = $1`,
+        [companyHandle]);
+
+    if (!handleCheck.rows) {
+      throw new BadRequestError(`Duplicate job: ${title}`);
+    }
 
     const result = await db.query(
           `INSERT INTO jobs
            (title, salary, equity, company_handle)
            VALUES ($1, $2, $3, $4)
-           RETURNING title, salary, equity, company_handle AS "companyHandle"`,
+           RETURNING id, title, salary, equity, company_handle AS "companyHandle"`,
         [
           title,
           salary,

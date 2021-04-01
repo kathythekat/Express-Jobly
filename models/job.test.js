@@ -217,7 +217,7 @@ describe("update", function () {
       equity: null,
       companyHandle: "c1",
     });
-    
+
     const result = await db.query(
       `SELECT id, title, salary, equity, company_handle
        FROM jobs
@@ -253,20 +253,20 @@ describe("update", function () {
 
 // /************************************** remove */
 
-// describe("remove", function () {
-//   test("works", async function () {
-//     await Job.remove("c1");
-//     const res = await db.query(
-//         "SELECT handle FROM jobs WHERE handle='c1'");
-//     expect(res.rows.length).toEqual(0);
-//   });
+describe("remove", function () {
+  test("works", async function () {
+    await Job.remove(jobIds[0]);
+    const res = await db.query(
+        `SELECT id FROM jobs WHERE id=${jobIds[0]}`);
+    expect(res.rows.length).toEqual(0);
+  });
 
-//   test("not found if no such job", async function () {
-//     try {
-//       await Job.remove("nope");
-//       fail();
-//     } catch (err) {
-//       expect(err instanceof NotFoundError).toBeTruthy();
-//     }
-//   });
-// });
+  test("not found if no such job", async function () {
+    try {
+      await Job.remove(6);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
