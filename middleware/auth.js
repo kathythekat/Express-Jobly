@@ -34,9 +34,6 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
-  // console.log("GLOBAL: ", res.locals.user.username);
-  // console.log("PARAMS: ", req.params.username);
-  
   try {
     if (!res.locals.user || res.locals.user.username !== req.params.username) {
       throw new UnauthorizedError("here");

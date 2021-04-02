@@ -33,7 +33,7 @@ class Job {
         [companyHandle]);
 
     if (!handleCheck.rows) {
-      throw new BadRequestError(`Duplicate job: ${title}`);
+      throw new BadRequestError(`Invalid handle: ${companyHandle}`);
     }
 
     const result = await db.query(
@@ -55,9 +55,7 @@ class Job {
 
   /** Find all jobs.
    *
-   * if filter is passed into query string, then dynamically apply filters to query
-   * if filter terms provided, push to conditions array and expressions array, utilizing
-   * conditions length for sanitation of query terms
+   *  if filter(s) provided, include in your search of database 
    * 
    * Returns [{ id, title, salary, equity, companyHandle }, ...]
    * 
@@ -75,40 +73,40 @@ class Job {
             ORDER BY title`);
     return jobsRes.rows;
     }
-    // const {name, minEmployees, maxEmployees} = filters;
-    // let companyQuery =  
-    //   `SELECT handle,
-    //         name,
-    //         description,
-    //         num_employees AS "numEmployees",
-    //         logo_url AS "logoUrl"
-    //         FROM jobs`;
+    const {title, minSalary, hasEquity} = filters;
 
-    // let conditions = [];
-    // let expressions = [];
-    // if (minEmployees > maxEmployees) {
-    //   throw new BadRequestError('Minimum employees must be less than max employees.');
-    // }
-    // if (name) {
-    //   conditions.push(`%${name}%`)
-    //   expressions.push(`name ILIKE $${conditions.length}`) 
-    // }
-    // if (minEmployees) {
-    //   conditions.push(minEmployees);
-    //   expressions.push(`num_employees >= $${conditions.length}`);
-    // }
-    // if (maxEmployees) {
-    //   conditions.push(maxEmployees);
-    //   expressions.push(`num_employees <= $${conditions.length}`);
-    // }
-    // if (expressions.length > 0) {
-    //   companyQuery += ' WHERE ' + expressions.join(' AND ') + ' ORDER BY name';
-    // } else {
-    //   throw new BadRequestError();
-    // }
+    let jobQuery =  
+      `SELECT id,
+            title,
+            salary,
+            equity,
+            company_handle AS "companyHandle"
+       FROM jobs`;
 
-    // const companiesRes = await db.query(companyQuery, conditions);
-    // return companiesRes.rows;
+    let conditions = [];
+    let expressions = [];
+
+    if (title) {
+      conditions.push(`%${title}%`)
+      expressions.push(`title ILIKE $${conditions.length}`) 
+    }
+    if (minSalary) {
+      conditions.push(minSalary);
+      expressions.push(`salary >= $${conditions.length}`);
+    }
+    if (hasEquity === true) {
+      expressions.push(`equity > 0`);
+    }
+    if (expressions.length > 0) {
+      jobQuery += ' WHERE ' + expressions.join(' AND ');
+    } else {
+      throw new BadRequestError();
+    }
+
+    jobQuery += ' ORDER BY title'
+
+    const jobResults = await db.query(jobQuery, conditions);
+    return jobResults.rows;
   }
 
   /** Given a job id, return data about job.

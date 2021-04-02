@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://our.company.com/companyNew.schema.json",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "minSalary": {
+      "type": "string",
+      "minimum":0
+    },
+    "hasEquity": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": []
+}

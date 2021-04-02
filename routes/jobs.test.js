@@ -141,7 +141,8 @@ describe("GET /jobs/:id", function () {
       },
     });
   });
-
+  // request /jobs, grab first job
+  // request /jobs, grab all jobs - grab index[0]
 
   test("not found for no such job", async function () {
     const resp = await request(app).get(`/jobs/0`);

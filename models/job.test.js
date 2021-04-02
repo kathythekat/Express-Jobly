@@ -84,75 +84,71 @@ describe("findAll", function () {
       }
     ]);
   });
-  // test("works: with filter: name", async function () {
-  //   let jobs = await Job.findAll({
-  //     name: "2",
-  //   });
-  //   expect(jobs).toEqual([
-  //     {
-  //       handle: "c2",
-  //       name: "C2",
-  //       description: "Desc2",
-  //       numEmployees: 2,
-  //       logoUrl: "http://c2.img",
-  //     }
-  //   ]);
-  // });
-  // test("works: with filter: minEmployees", async function () {
-  //   let jobs = await Job.findAll({
-  //     minEmployees: 3
-  //   });
-  //   expect(jobs).toEqual([
-  //     {
-  //       handle: "c3",
-  //       name: "C3",
-  //       description: "Desc3",
-  //       numEmployees: 3,
-  //       logoUrl: "http://c3.img",
-  //     }
-  //   ]);
-  // });
-  // test("works: with filter: maxEmployees", async function () {
-  //   let jobs = await Job.findAll({
-  //     maxEmployees: 1
-  //   });
-  //   expect(jobs).toEqual([
-  //     {
-  //       handle: "c1",
-  //       name: "C1",
-  //       description: "Desc1",
-  //       numEmployees: 1,
-  //       logoUrl: "http://c1.img",
-  //     }
-  //   ]);
-  // });
-  // test("works: with filter: name, minEmployees, maxEmployees", async function () {
-  //   let jobs = await Job.findAll({
-  //     name: "C",
-  //     minEmployees: 1,
-  //     maxEmployees: 1
-  //   });
-  //   expect(jobs).toEqual([
-  //     {
-  //       handle: "c1",
-  //       name: "C1",
-  //       description: "Desc1",
-  //       numEmployees: 1,
-  //       logoUrl: "http://c1.img",
-  //     }
-  //   ]);
-  // });
-  // test("doesn't work: with filter, maxEmployees < minEmployees", async function () {
-  //   try{
-  //     let jobs = await Job.findAll({
-  //       minEmployees: 3,
-  //       maxEmployees: 1
-  //     });
-  //   } catch(err) {
-  //     expect(err instanceof BadRequestError).toBeTruthy();
-  //   }
-  // });
-  // //add another one if min employees = 50
+  test("works with filter: title", async function () {
+    let jobs = await Job.findAll({
+      title: "j1",
+    });
+    expect(jobs).toEqual([{
+        id: expect.any(Number),
+        title: "j1",
+        salary: 100,
+        equity: "0.01",
+        companyHandle: "c1"
+      }
+    ]);
+  });
+  test("works: with filter: minSalary", async function () {
+    let jobs = await Job.findAll({
+      minSalary: 200
+    });
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "j2",
+        salary: 200,
+        equity: "0.02",
+        companyHandle: "c2"
+      },
+      { 
+        id: expect.any(Number),
+        title: "j3",
+        salary: 300,
+        equity: "0.03",
+        companyHandle: "c3"
+      }
+    ]);
+  });
+  test("filter recognizes no matches: hasEquity", async function () {
+    try {
+      await Job.findAll({ hasEquity: false });
+      fail() 
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+  test("works with filter: title, minSalary, hasEquity", async function () {
+    let jobs = await Job.findAll({
+      name: "j",
+      minSalary: 101,
+      hasEquity: true
+    });
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "j2",
+        salary: 200,
+        equity: "0.02",
+        companyHandle: "c2"
+      },
+      { 
+        id: expect.any(Number),
+        title: "j3",
+        salary: 300,
+        equity: "0.03",
+        companyHandle: "c3"
+      }
+    ]);
+  });
 });
   
 
@@ -160,7 +156,6 @@ describe("findAll", function () {
 
 describe("get", function () {
   test("works", async function () {
-    // console.log("jobIds[0] is: ", jobIds[0])
     let job = await Job.get(jobIds[0]);
     
     expect(job).toEqual({

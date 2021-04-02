@@ -11,6 +11,7 @@ const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
+const jobFindSchema = require("../schemas/jobFind.json");
 
 
 const router = new express.Router();
@@ -41,21 +42,25 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
  *   { jobs: [ { id, name, description, numEmployees, logoUrl }, ...] }
  *
  * Can filter on provided search filters:
- * - minEmployees
- * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
+ * - job title
+ * - minimum salary
+ * - has any equity 
  *
  * Authorization required: none
  */
 
 router.get("/", async function (req, res, next) {
-  // let filter = req.query;
-  // const validator = jsonschema.validate(filter, companyFindSchema);
-  // if (!validator.valid) {
-  //   const errs = validator.errors.map(e => e.stack);
-  //   throw new BadRequestError(errs);
-  // }
-  const jobs = await Job.findAll();
+  let filter = req.query;
+  const validator = jsonschema.validate(filter, jobFindSchema);
+  if (!validator.valid) {
+    const errs = validator.errors.map(e => e.stack);
+    throw new BadRequestError(errs);
+  }
+
+  if (req.query.hasEquity) {
+     filter.hasEquity = (req.query.hasEquity === "true") 
+  }
+  const jobs = await Job.findAll(filter);
   return res.json({ jobs });
 });
 
