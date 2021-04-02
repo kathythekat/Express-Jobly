@@ -28,22 +28,6 @@ function authenticateJWT(req, res, next) {
   }
 }
 
-/** Middleware to use when they must be logged in.
- *
- * If not, raises Unauthorized.
- */
-
-function ensureLoggedIn(req, res, next) {
-  try {
-    if (!res.locals.user || res.locals.user.username !== req.params.username) {
-      throw new UnauthorizedError("here");
-    }
-    return next();
-  } catch (err) {
-    return next(err);
-  }
-}
-
 /** Middleware to verify user is admin
  *
  * If not, raises Unauthorized.
@@ -81,7 +65,6 @@ function ensureLoggedInOrAdmin(req, res, next){
 
 module.exports = {
   authenticateJWT,
-  ensureLoggedIn,
   ensureAdminUser,
   ensureLoggedInOrAdmin
 };

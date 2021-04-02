@@ -39,6 +39,21 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
   return res.status(201).json({ user, token });
 });
 
+/** POST / { user, jobid }  => { application status }
+ *
+ * Submits a users application for a job 
+ *
+ * if valid, returns confirmation of which job applied to otherwise error returned.
+ *
+ * Authorization required: logged in or admin
+ **/
+
+router.post('/:username/jobs/:id', ensureLoggedInOrAdmin, async function (req, res, next) {
+  const jobId = +req.params.id
+  await User.apply(req.params.username, jobId)
+
+  return res.json({ applied: jobId})
+});
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *

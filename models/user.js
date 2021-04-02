@@ -102,17 +102,38 @@ class User {
    **/
 
   static async findAll() {
-    const result = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           ORDER BY username`,
+    // get all users
+    const userRes = await db.query(
+      `SELECT username,
+              first_name AS "firstName",
+              last_name AS "lastName",
+              email,
+              is_admin AS "isAdmin"
+        FROM users
+        ORDER BY username`,
     );
-
-    return result.rows;
+    const users = userRes.rows;
+    
+    // get all applications
+    const appRes = await db.query(`
+      SELECT job_id, username
+      FROM applications
+    `)
+    const apps = appRes.rows
+    
+    // for each user that exists append the matching app 
+    for(let user of users) {
+      let userApps = []
+      
+      for(let app of apps) {
+        if (app.username === user.username) {
+          userApps.push(app.job_id)
+        }
+      }
+      user.jobs = userApps
+    }
+    
+    return users
   }
 
   /** Given a username, return data about user.
@@ -134,10 +155,18 @@ class User {
            WHERE username = $1`,
         [username],
     );
-
     const user = userRes.rows[0];
-
+  
     if (!user) throw new NotFoundError(`No user: ${username}`);
+    
+    const userJobRes = await db.query(`
+      SELECT job_id
+      FROM applications 
+      WHERE username = $1
+    `, [username])
+
+    const userJobsAppliedTo = userJobRes.rows
+    user.jobs = userJobsAppliedTo
 
     return user;
   }
@@ -204,7 +233,48 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
-}
 
+  /** apply given user to the given job via id. Make sure both user and job exist and the application is not a duplicate */
+  static async apply(username, jobId) {
+
+    const duplicateCheck = await db.query(
+      `SELECT username
+       FROM applications
+       WHERE username = $1 AND job_id = $2`,
+    [username, jobId],
+    );
+
+    if (duplicateCheck.rows[0]) {
+      throw new BadRequestError(`Duplicate application: ${username} already applied to ${jobId}`);
+    }
+
+    //make sure job applied to exists
+    const jobRes = await db.query(`
+      SELECT title
+      FROM jobs
+      WHERE id = $1
+    `, [jobId])
+
+    const job = jobRes.rows[0];
+
+    if(!job) throw new NotFoundError(`No job: ${id}`)
+    
+    //make sure user applying exists
+    const userRes = await db.query(`
+      SELECT username
+      FROM users
+      WHERE username = $1
+    `, [username])
+
+    const user = userRes.rows[0];
+
+    if(!user) throw new NotFoundError(`No user: ${username}`)
+
+    const results = await db.query(`
+      INSERT INTO applications(username, job_id)
+      VALUES ($1, $2)
+    `, [username, jobId])
+  }
+}
 
 module.exports = User;
