@@ -38,7 +38,6 @@
     "username",
     "firstName",
     "lastName",
-    "password",
     "email"
   ]
 }

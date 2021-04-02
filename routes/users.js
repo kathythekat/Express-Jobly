@@ -11,6 +11,7 @@ const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const generator = require('generate-password');
 
 const router = express.Router();
 
@@ -34,7 +35,13 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
+  let password = generator.generate({
+    length:10,
+    numbers: true
+  });
+  req.body.password = password;
   const user = await User.register(req.body);
+  
   const token = createToken(user);
   return res.status(201).json({ user, token });
 });

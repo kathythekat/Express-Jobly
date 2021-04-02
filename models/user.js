@@ -10,6 +10,8 @@ const {
 } = require("../expressError");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
+const generate = require('generate-password');
+
 
 /** Related functions for users. */
 
